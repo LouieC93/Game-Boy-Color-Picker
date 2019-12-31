@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh=tw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <title>Game Boy Color Picker</title>
+</head>
+
+<body>
+    <div id="main">
+        <div id="gameboy">
+            <div id="scroll"></div>
+            <!-- 螢幕區 -->
+            <div id="view">
+                <div id="screen">
+                    <p id="hex">Game Start</p>
+                </div>
+                <span class="dot"></span>
+            </div>
+            <!-- 按鍵區 -->
+            <div id="control">
+                <!-- 左側RGB -->
+                <div id="slidebar">
+                    <!-- R -->
+                    <div id="areaR" class="rgb">
+                        <input type="range" min="0" max="255" step="1" name="red" id="red">
+                        <button id="rr" class="btn">R</button>
+                    </div>
+                    <!-- G -->
+                    <div id="areaG" class="rgb">
+                        <input type="range" min="0" max="255" step="1" name="green" id="green">
+                        <button id="gg" class="btn">G</button>
+                    </div>
+                    <!-- B -->
+                    <div id="areaB" class="rgb">
+                        <input type="range" min="0" max="255" step="1" name="blue" id="blue">
+                        <button id="bb" class="btn">B</button>
+                    </div>
+                </div>
+                <!-- 右側+- -->
+                <div id="math">
+                    <button id="add" class="btn">+</button>
+                    <button id="minus" class="btn">-</button>
+                </div>
+                <!-- 底部random -->
+                <div id="bottom">
+                    <button id="random">Random</button>
+                </div>
+                <!-- speaker -->
+                <div id="speaker">
+                    <div class="line l1"></div>
+                    <div class="line l2"></div>
+                    <div class="line l3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //  產生隨機顏色
+        var rgb_r = Math.floor(Math.random() * 256);
+        var rgb_g = Math.floor(Math.random() * 256);
+        var rgb_b = Math.floor(Math.random() * 256);
+        
+        // 點擊視窗事件
+        document.getElementById('rr').onclick = function () { ask('r'); };
+        document.getElementById('gg').onclick = function () { ask('g'); };
+        document.getElementById('bb').onclick = function () { ask('b'); };
+        // document.getElementById('random').onclick = function () { ask('ran'); };
+        
+
+        // 接住prompt輸入數值＆防呆
+        let ansR = rgb_r;
+        let ansG = rgb_g;
+        let ansB = rgb_b;
+        let screen= document.getElementById('screen');
+        let hex= document.getElementById('hex');
+
+
+        //  建立更新重整網頁隨機數值、更新點擊按鈕隨機數值、更新彈出視窗輸入數值函示
+        function updateAll() {
+            // 網頁重整數值 ansR & inputR.value => rgb_r(screen)
+            screen.style.background= `rgb(${rgb_r}, ${rgb_g}, ${rgb_b})`;
+            hex.style.color= `rgb(${255-rgb_r}, ${255-rgb_g}, ${255-rgb_b})`;
+            hex.textContent=`RGB(${rgb_r}, ${rgb_g}, ${rgb_b})`;
+            inputR.value= rgb_r;
+            inputG.value= rgb_g;
+            inputB.value= rgb_b;
+
+            // 輸入＆隨機按鈕數值  inputR => ansR(screen)
+            screen.style.background = `rgb(${ansR}, ${ansG}, ${ansB})`;
+            hex.style.color= `rgb(${255-ansR}, ${255-ansG}, ${255-ansB})`;
+            hex.textContent=`RGB(${ansR}, ${ansG}, ${ansB})`;
+            inputR.value= ansR;
+            inputG.value= ansG;
+            inputB.value= ansB;
+
+            hexR= ansR.toString(16);
+            hexG= ansG.toString(16);
+            hexB= ansB.toString(16);
+        }
+        
+        // prompt & random button function
+        function ask(clr) {
+            switch (clr) {
+                case 'r':
+                    ansR = prompt('請輸入0-255間的整數', rgb_r);
+                    if (ansR >= 0 && ansR <= 255 && (ansR % 1) == 0 && ansR!=null) {
+                        updateAll();
+                        writeHex();
+                    }
+                    else ask('r');
+                    break;
+                case 'g':
+                    ansG = prompt('請輸入0-255間的整數', rgb_g);
+                    if (ansG >= 0 && ansG <= 255 && (ansG % 1) == 0 && ansG!=null) {
+                        updateAll();
+                        writeHex();
+                    }
+                    else ask('g');
+                    break;
+                case 'b':
+                    ansB = prompt('請輸入0-255間的整數', rgb_b);
+                    if (ansB >= 0 && ansB <= 255 && (ansB % 1) == 0 && ansB!=null) {
+                        updateAll();
+                        writeHex();
+                    }
+                    else ask('b');
+                    break;
+            }
+        }
+
+        // 接住input數值
+        let inputR= document.getElementById('red');
+        let inputG= document.getElementById('green');
+        let inputB= document.getElementById('blue');
+        // 建立拖曳事件
+        inputR.oninput= function() {getInput('r')};
+        inputG.oninput= function() {getInput('g')};
+        inputB.oninput= function() {getInput('b')};
+        //  取得拖曳值
+        function getInput(num) {
+            switch (num) {
+                case 'r':
+                    ansR= inputR.value;
+                    // console.log(123);
+                    updateAll();
+                    writeHex();
+                break;
+                case 'g':
+                    ansG= inputG.value;
+                    // console.log(456);
+                    updateAll();
+                    writeHex();
+                break;
+                case 'b':
+                    ansB= inputB.value;
+                    // console.log(789);
+                    updateAll();
+                    writeHex();
+                break;
+            }
+        }
+
+        let btnAdd=document.getElementById('add');
+        let btnMin=document.getElementById('minus');
+        let btnRan=document.getElementById('random');
+        
+        // 建立點擊、按壓、放開事件
+        btnAdd.onmousedown= function() {hold('add')};
+        btnMin.onmousedown= function() {hold('minus')};
+        btnRan.onmousedown=function() {hold('ran')}
+
+        btnRan.onclick = function () { click('ran'); };
+        btnAdd.onclick = function () { click('add'); };
+        btnMin.onclick = function () { click('minus'); };
+
+        let keep;
+        btnRan.onmouseup = function () {clearInterval(keep)};
+        btnAdd.onmouseup = function () {clearInterval(keep)};
+        btnMin.onmouseup = function () {clearInterval(keep)};
+
+        // 滑鼠點擊函示
+        function click(which) {
+            switch (which) {
+                case 'add':
+                    if(ansR<255) ansR++;
+                    if(ansG<255) ansG++;
+                    if(ansB<255) ansB++;
+                    break;
+                case 'minus':
+                    if(ansR>0) ansR--;
+                    if(ansG>0) ansG--;
+                    if(ansB>0) ansB--;
+                    break;
+                case 'ran':
+                    ansR = Math.floor(Math.random() * 256);
+                    ansG = Math.floor(Math.random() * 256);
+                    ansB = Math.floor(Math.random() * 256);
+                    break;
+            }
+            updateAll();
+            writeHex();
+        }
+
+        function hold(which) {
+            keep= setInterval(function () {
+                click(which)
+            }, 30)
+        };
+
+        // 256轉16進位
+        let hexR= ansR.toString(16);
+        let hexG= ansG.toString(16);
+        let hexB= ansB.toString(16);
+
+        // 補0以及寫入函示
+        function writeHex() {
+            if(hexR.length<2) hexR=`0${hexR}`;
+            if(hexG.length<2) hexG=`0${hexG}`;
+            if(hexB.length<2) hexB=`0${hexB}`;
+            hex.textContent=`#${hexR}${hexG}${hexB}`;
+        }
+
+        // 讓螢幕跟slidebar數值重整時刷新
+        updateAll();
+        // 刷新HEX顏色代碼
+        writeHex();
+    </script>
+</body>
+
+</html>
